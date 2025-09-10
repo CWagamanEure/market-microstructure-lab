@@ -8,11 +8,19 @@ class LimitOrder:
         self.price = price
         self.quantity = quantity
 
+    def __repr__(self):
+        return (
+            f"LimitOrder(side={self.side!r}, price={self.price}, qty={self.quantity})"
+        )
+
 
 class MarketOrder:
     def __init__(self, side: Literal["buy", "sell"], quantity: float):
         self.side = side
         self.quantity = quantity
+
+    def __repr__(self):
+        return f"MarketOrder(side={self.side!r}, qty={self.quantity})"
 
 
 class LimitOrderBook:
@@ -23,10 +31,34 @@ class LimitOrderBook:
     ):
         self.market_order_list: list[MarketOrder] = market_order_list or []
         self.limit_order_list: list[LimitOrder] = limit_order_list or []
+        self.sell_limit_orders = []
+        self.buy_limit_orders = []
+        self.sell_market_orders = []
+        self.buy_market_orders = []
 
-    def sort_orders(self):
-        market_order_list.sort(key=lambda o: o.price)
-        limit_order_list.sort(key=lambda o: o.price)
+    def __repr__(self):
+        return (
+            "LimitOrderBook(\n"
+            f"  sell_limits={self.sell_limit_orders!r},\n"
+            f"  buy_limits={self.buy_limit_orders!r},\n"
+            f"  sell_markets={self.sell_market_orders!r},\n"
+            f"  buy_markets={self.buy_market_orders!r}\n"
+            ")"
+        )
+
+    def split_and_sort_orders(self):
+        for order in self.market_order_list:
+            if order.side == "sell":
+                self.sell_market_orders.append(order)
+            else:
+                self.buy_market_orders.append(order)
+        for order in self.limit_order_list:
+            if order.side == "sell":
+                self.sell_limit_orders.append(order)
+            else:
+                self.buy_limit_orders.append(order)
+
+        sort(self.mar)
 
     def match_orders(self):
         pass
@@ -41,4 +73,8 @@ limit_orders = [
 market_orders = [MarketOrder("buy", 5), MarketOrder("buy", 10), MarketOrder("sell", 4)]
 
 book = LimitOrderBook(market_orders, limit_orders)
-book.sort_orders()
+print(book)
+print()
+book.split_and_sort_orders()
+
+print(book)
