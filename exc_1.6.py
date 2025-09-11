@@ -41,7 +41,10 @@ class LimitOrderBook:
         self.buy_market_orders = []
         self.sell_bucket = defaultdict(float)
         self.buy_bucket = defaultdict(float)
-
+        self.qnuma = 0
+        self.qnumb = 0
+        self.best_bid = 0
+        self.best_ask = 0
     def __repr__(self):
         return (
             "LimitOrderBook(\n"
@@ -78,6 +81,14 @@ class LimitOrderBook:
         for order in self.sell_limit_orders:
             key = order.price
             self.sell_bucket[key] += float(order.quantity)
+    
+    def calc_num_market_orders(self):
+        self.qnumb= 0.0
+        for order in self.buy_market_orders:
+            self.qnumb += order.quantity            
+        self.qnuma = 0.0
+        for order in self.sell_market_orders:
+            self.qnuma += order.quantity
 
     def show_buckets(self):
         print("=== ORDER BUCKETS ===")
@@ -91,6 +102,15 @@ class LimitOrderBook:
         for price, qty in sorted(self.sell_bucket.items(), key=lambda x: x[0]):
             print(f"  {price:>8.2f} : {qty:.2f}")
 
+
+    def find_best_bid_ask(self):
+        ask_prices = self.sell_bucket.keys()
+        bid_prices = self.buy_bucket.keys()
+        self.best_bid = max(bid_prices)
+        self.best_ask = min(ask_prices)
+        print(f"Best Bid: {self.best_bid}")
+        print(f"Best Ask: {self.best_ask}")
+
     def plot_auction_curves(self):
         bid_prices = sorted(self.buy_bucket.keys(), reverse=True)
         ask_prices = sorted(self.sell_bucket.keys())
@@ -98,8 +118,8 @@ class LimitOrderBook:
         bid_qtys = [float(self.buy_bucket[p])  for p in bid_prices]
         ask_qtys = [float(self.sell_bucket[p]) for p in ask_prices]
 
-        bid_cum = np.cumsum(bid_qtys)
-        ask_cum = np.cumsum(ask_qtys)
+        bid_cum = np.cumsum(bid_qtys) + float(self.qnumb)
+        ask_cum = np.cumsum(ask_qtys) + float(self.qnuma)
 
         plt.step(bid_cum, bid_prices, where="post", label="Demand")
         plt.step(ask_cum, ask_prices, where="post", label="Supply")
@@ -110,11 +130,15 @@ class LimitOrderBook:
         plt.show()
 
 
+
 def run(market_orders, limit_orders):
     book = LimitOrderBook(market_orders, limit_orders)
     book.split_orders()
     book.merge_limits()
+    book.calc_num_market_orders()
+    book.find_best_bid_ask()
     book.plot_auction_curves()
+    
 
 limit_orders = [
     LimitOrder("buy", 101, 5),
