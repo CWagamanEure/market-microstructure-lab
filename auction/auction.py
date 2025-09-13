@@ -26,7 +26,7 @@ class MarketOrder:
         return f"MarketOrder(side={self.side!r}, qty={self.quantity})"
 
 
-class LimitOrderBook:
+class Auction:
     def __init__(
         self,
         market_order_list: list["MarketOrder"] | None = None,
@@ -128,51 +128,28 @@ class LimitOrderBook:
         plt.grid(True); plt.legend(); plt.tight_layout()
         plt.show()
 
+        
 
 
 def run(market_orders, limit_orders):
-    book = LimitOrderBook(market_orders, limit_orders)
-    book.split_orders()
-    book.merge_limits()
-    book.calc_num_market_orders()
-    book.find_best_bid_ask()
-    book.plot_auction_curves()
+    auction = Auction(market_orders, limit_orders)
+    auction.split_orders()
+    auction.merge_limits()
+    auction.calc_num_market_orders()
+    auction.find_best_bid_ask()
+    auction.plot_auction_curves()
     
 
 limit_orders = [
-    LimitOrder("buy", 101, 5),
-    LimitOrder("buy", 100, 3),
-    LimitOrder("buy", 100, 4),
-    LimitOrder("buy", 99,  6),
-    LimitOrder("buy", 99,  2),
-    LimitOrder("buy", 98,  7),
-    LimitOrder("buy", 98,  1),
-    LimitOrder("buy", 97,  8),
-    LimitOrder("buy", 97,  3),
-    LimitOrder("buy", 96,  9),
-    LimitOrder("buy", 95,  5),
-    LimitOrder("buy", 95,  2),
-    LimitOrder("buy", 94,  4),
-    LimitOrder("buy", 94,  6),
-    LimitOrder("buy", 93,  3),
-
-    LimitOrder("sell", 102, 4),
-    LimitOrder("sell", 102, 2),
-    LimitOrder("sell", 103, 6),
-    LimitOrder("sell", 103, 3),
-    LimitOrder("sell", 104, 5),
-    LimitOrder("sell", 104, 1),
-    LimitOrder("sell", 105, 7),
-    LimitOrder("sell", 105, 2),
-    LimitOrder("sell", 106, 8),
-    LimitOrder("sell", 107, 6),
-    LimitOrder("sell", 107, 4),
-    LimitOrder("sell", 108, 3),
-    LimitOrder("sell", 108, 5),
-    LimitOrder("sell", 109, 2),
-    LimitOrder("sell", 110, 9),
+    LimitOrder("buy", 3, 100),
+    LimitOrder("buy", 4, 200),
+    LimitOrder("buy", 3.50, 200),
+    LimitOrder("buy", 2.50, 500),
+    LimitOrder("sell", 5, 500),
+    LimitOrder("sell", 3, 600),
+    LimitOrder("sell", 4, 500),
 ]
 
-market_orders = [MarketOrder("buy", 5), MarketOrder("buy", 10), MarketOrder("sell", 4)]
+market_orders = [MarketOrder("buy", 500), MarketOrder("sell", 200)]
 
 run(market_orders, limit_orders)
